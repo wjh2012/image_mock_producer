@@ -33,7 +33,7 @@ def get_single_a4_sync():
     img = Image.new("RGB", (a4_width, a4_height), "white")
     draw = ImageDraw.Draw(img)
 
-    if random.random() < 1 / 3:
+    if random.random() < 1 / 4:
         return img
 
     font_size = 55
@@ -85,9 +85,22 @@ async def compressed_a4(count=5):
     return zip_buffer
 
 
-# 실행
-if __name__ == "__main__":
-    desired_output_path = "random_text_a4.png"
+def save_a4_example():
+    output_path = "random_text_a4.png"
     random_image = get_single_a4_sync()
     if random_image is not None:
-        random_image.save(desired_output_path)
+        random_image.save(output_path)
+
+
+async def save_compressed_a4_example(output_path="random_text_a4.zip", count=5):
+    zip_buffer = await compressed_a4(count)
+
+    with open(output_path, "wb") as f:
+        f.write(zip_buffer.getvalue())
+
+    print(f"✅ ZIP 파일 저장 완료: {output_path}")
+
+
+# 실행
+if __name__ == "__main__":
+    asyncio.run(save_compressed_a4_example("a4_images.zip", count=5))
