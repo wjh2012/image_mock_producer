@@ -1,6 +1,9 @@
 import asyncio
+import io
 import random
+import uuid
 import zipfile
+from datetime import datetime
 from io import BytesIO
 from PIL import Image, ImageDraw, ImageFont
 
@@ -62,8 +65,16 @@ def get_single_a4_sync():
     return img
 
 
+def get_single_a4_bytes(format="JPEG"):
+    image = get_single_a4_sync()
+    img_byte_arr = io.BytesIO()
+    image.save(img_byte_arr, format=format)
+    img_byte_arr.seek(0)
+    return img_byte_arr
+
+
 async def get_single_a4():
-    return await asyncio.to_thread(get_single_a4_sync)
+    return await asyncio.to_thread(get_single_a4_bytes)
 
 
 async def compressed_a4(count=5):
@@ -73,11 +84,22 @@ async def compressed_a4(count=5):
     def zip_images(img_list):
         zip_buffer = BytesIO()
         with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zipf:
-            for i, img in enumerate(img_list):
+            for i, img_bytes in enumerate(img_list):
+                try:
+                    img = Image.open(img_bytes)
+                except Exception as e:
+                    raise Exception(f"이미지 열기 실패 (인덱스 {i}): {e}")
+
                 img_buffer = BytesIO()
-                img.save(img_buffer, format="PNG")
+                img.save(img_buffer, format="jpeg")
                 img_buffer.seek(0)
-                zipf.writestr(f"a4_image_{i+1}.png", img_buffer.read())
+
+                timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+                short_uuid = uuid.uuid4().hex[:8]
+                gen_name = f"{timestamp}_{short_uuid}.jpeg"  # 확장자를 PNG로 수정
+
+                zipf.writestr(gen_name, img_buffer.read())
+
         zip_buffer.seek(0)
         return zip_buffer
 
