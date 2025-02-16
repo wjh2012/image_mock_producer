@@ -21,9 +21,10 @@ async def produce_single_image(
 ):
     image = await get_single_a4()
 
+    prefix = datetime.now().strftime("%Y%m%d")
     timestamp = datetime.now().strftime("%y%m%d%H%M%S")
     short_uuid = uuid.uuid4().hex[:8]
-    gen_name = f"{timestamp}_{short_uuid}.jpeg"
+    gen_name = f"{prefix}/{timestamp}_{short_uuid}.jpeg"
 
     upload_file(
         minio_client=minio_client,
@@ -41,9 +42,10 @@ async def produce_compressed_image(
 ):
     compressed_image = await compressed_a4()
 
+    prefix = datetime.now().strftime("%Y%m%d")
     timestamp = datetime.now().strftime("%y%m%d%H%M%S")
     short_uuid = uuid.uuid4().hex[:8]
-    gen_name = f"{timestamp}_{short_uuid}.zip"
+    gen_name = f"{prefix}/{timestamp}_{short_uuid}.zip"
 
     upload_file(
         minio_client=minio_client,
