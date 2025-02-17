@@ -6,26 +6,36 @@ config = get_settings()
 
 
 class RabbitMQPublisher:
-    def __init__(self, host="localhost", queue_name="my_queue"):
+    def __init__(self, host, port, username, password, queue):
         self.host = host
-        self.queue_name = queue_name
+        self.port = port
+        self.username = username
+        self.password = password
+        self.queue = queue
         self.connection = None
         self.channel = None
         self.connect()
 
     def connect(self):
         try:
-            connection_params = pika.ConnectionParameters(host=self.host)
-            self.connection = pika.BlockingConnection(connection_params)
+            credentials = pika.PlainCredentials(self.username, self.password)
+            parameters = pika.ConnectionParameters(
+                host=self.host,
+                port=self.port,
+                credentials=credentials,
+                heartbeat=600,  # heartbeat 설정
+                blocked_connection_timeout=300,  # 연결 차단 타임아웃 설정
+            )
+            self.connection = pika.BlockingConnection(parameters)
             self.channel = self.connection.channel()
-            self.channel.queue_declare(queue=self.queue_name)
+            self.channel.queue_declare(queue=self.queue, durable=True)
         except Exception as e:
             raise Exception(f"RabbitMQ 연결 실패: {e}")
 
     def publish_message(self, message: str):
         try:
             self.channel.basic_publish(
-                exchange="", routing_key=self.queue_name, body=message
+                exchange="", routing_key=self.queue, body=message
             )
         except Exception as e:
             raise Exception(f"RabbitMQ 메시지 발행 실패: {e}")
@@ -36,7 +46,13 @@ class RabbitMQPublisher:
 
 
 def get_rabbitmq_publisher():
-    publisher = RabbitMQPublisher(host="localhost", queue_name="my_queue")
+    publisher = RabbitMQPublisher(
+        host=config.rabbitmq_host,
+        port=config.rabbitmq_port,
+        username=config.rabbitmq_username,
+        password=config.rabbitmq_password,
+        queue=config.rabbitmq_queue,
+    )
     try:
         yield publisher
     finally:

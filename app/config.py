@@ -8,8 +8,9 @@ class Settings(BaseSettings):
 
     rabbitmq_host: str
     rabbitmq_port: str
-    rabbitMQ_username: str
-    rabbitMQ_password: str
+    rabbitmq_username: str
+    rabbitmq_password: str
+    rabbitmq_queue: str
 
     minio_host: str
     minio_port: str
