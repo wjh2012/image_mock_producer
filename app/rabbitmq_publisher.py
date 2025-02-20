@@ -1,6 +1,7 @@
 import pika
 
 from app.config import get_settings
+from app.custom_logger import logger
 
 config = get_settings()
 
@@ -30,15 +31,16 @@ class RabbitMQPublisher:
             self.channel = self.connection.channel()
             self.channel.queue_declare(queue=self.queue, durable=True)
         except Exception as e:
-            raise Exception(f"RabbitMQ 연결 실패: {e}")
+            raise Exception(f"❌ RabbitMQ 연결 실패: {e}")
 
     def publish_message(self, message: str):
         try:
             self.channel.basic_publish(
                 exchange="", routing_key=self.queue, body=message
             )
+            logger.info(f"📩 RabbitMQ 메시지 발행 완료")
         except Exception as e:
-            raise Exception(f"RabbitMQ 메시지 발행 실패: {e}")
+            raise Exception(f"❌ RabbitMQ 메시지 발행 실패: {e}")
 
     def close(self):
         if self.connection and self.connection.is_open:
@@ -53,7 +55,4 @@ def get_rabbitmq_publisher():
         password=config.rabbitmq_password,
         queue=config.rabbitmq_queue,
     )
-    try:
-        yield publisher
-    finally:
-        publisher.close()
+    return publisher

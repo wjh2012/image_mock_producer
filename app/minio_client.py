@@ -4,6 +4,7 @@ import boto3
 import botocore
 
 from app.config import get_settings
+from app.custom_logger import logger
 
 config = get_settings()
 
@@ -35,7 +36,7 @@ def get_minio_client() -> boto3.client:
         )
         return client
     except Exception as e:
-        raise Exception(f"MinIO 연결 실패: {e}")
+        raise Exception(f"❌ MinIO 연결 실패: {e}")
 
 
 def get_bucket_list(minio_client: boto3.client):
@@ -44,7 +45,7 @@ def get_bucket_list(minio_client: boto3.client):
         buckets = response.get("Buckets", [])
         return buckets
     except Exception as e:
-        raise Exception(f"MinIO 버킷 조회 실패: {e}")
+        raise Exception(f"❌ MinIO 버킷 조회 실패: {e}")
 
 
 def upload_file(
@@ -62,9 +63,23 @@ def upload_file(
             Body=file_data,
             ContentType=content_type.value,
         )
-        return response
+
+        http_status = response.get("ResponseMetadata", {}).get("HTTPStatusCode", None)
+
+        if http_status == 200:
+            logger.info(
+                f"✅ MinIO 파일 업로드 성공: {object_name} (Bucket: {bucket_name})"
+            )
+            return response
+        else:
+            error_msg = f"❌ MinIO 파일 업로드 실패 (Status: {http_status})"
+            logger.error(error_msg)
+            raise Exception(error_msg)
+
     except Exception as e:
-        raise Exception(f"MinIO 파일 업로드 실패: {e}")
+        error_msg = f"❌ MinIO 파일 업로드 실패: {e}"
+        logger.error(error_msg)
+        raise Exception(error_msg)
 
 
 def ensure_bucket(minio_client: boto3.client, bucket_name):
@@ -76,6 +91,6 @@ def ensure_bucket(minio_client: boto3.client, bucket_name):
             try:
                 minio_client.create_bucket(Bucket=bucket_name)
             except Exception as create_error:
-                raise Exception(f"버킷 생성 실패: {create_error}")
+                raise Exception(f"❌ 버킷 생성 실패: {create_error}")
         else:
-            raise Exception(f"버킷 확인 실패: {e}")
+            raise Exception(f"❌ 버킷 확인 실패: {e}")
