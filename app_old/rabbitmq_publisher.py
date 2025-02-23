@@ -1,7 +1,7 @@
 import pika
 
-from app.config import get_settings
-from app.custom_logger import logger
+from app_old.config import get_settings
+from app_old.custom_logger import logger
 
 config = get_settings()
 

@@ -3,8 +3,8 @@ from enum import Enum
 import boto3
 import botocore
 
-from app.config import get_settings
-from app.custom_logger import logger
+from app_old.config import get_settings
+from app_old.custom_logger import logger
 
 config = get_settings()
 

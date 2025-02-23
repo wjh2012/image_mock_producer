@@ -5,10 +5,10 @@ from datetime import datetime
 
 from fastapi import FastAPI, BackgroundTasks
 
-from app.a4_text_image_maker import compressed_a4, get_single_a4
-from app.config import get_settings
-from app.minio_client import get_minio_client, upload_file, ContentType
-from app.rabbitmq_publisher import get_rabbitmq_publisher
+from app_old.a4_text_image_maker import compressed_a4, get_single_a4
+from app_old.config import get_settings
+from app_old.minio_client import get_minio_client, upload_file, ContentType
+from app_old.rabbitmq_publisher import get_rabbitmq_publisher
 
 config = get_settings()
 

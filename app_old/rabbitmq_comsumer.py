@@ -1,6 +1,6 @@
 import pika
 
-from app.config import get_settings
+from app_old.config import get_settings
 
 config = get_settings()
 
