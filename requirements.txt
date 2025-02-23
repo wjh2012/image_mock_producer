@@ -6,6 +6,7 @@ black
 msgspec
 pydantic-settings
 
+aio-pika
 pika
 boto3
 
