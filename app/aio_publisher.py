@@ -10,7 +10,7 @@ class AioPublisher:
         self._channel = None
 
     async def connect(self):
-        self._connection = await aio_pika.connect_robust(self.amqp_url)
+        self._connection = await aio_pika.connect_robust(self.amqp_url, heartbeat=180)
         self._channel = await self._connection.channel()
         print("✅ RabbitMQ 연결 성공")
 
