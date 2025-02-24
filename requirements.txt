@@ -9,6 +9,7 @@ pydantic-settings
 aio-pika
 pika
 boto3
+aioboto3
 
 opencv-python-headless
 pillow
