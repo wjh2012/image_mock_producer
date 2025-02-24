@@ -1,6 +1,8 @@
 import asyncio
 import io
+import os
 import random
+import threading
 import time
 import uuid
 import zipfile
@@ -70,6 +72,9 @@ def get_single_a4_bytes():
     image = get_single_a4_sync()
     img_byte_arr = io.BytesIO()
     image.save(img_byte_arr, format="JPEG")
+    print(
+        f"get_single_a4_bytes 실행 중: PID {os.getpid()}, 스레드 {threading.current_thread().name}"
+    )
     return img_byte_arr.getvalue()
 
 

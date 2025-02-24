@@ -1,3 +1,6 @@
+import os
+import threading
+
 import aio_pika
 
 
@@ -21,6 +24,9 @@ class AioPublisher:
         await self._channel.default_exchange.publish(
             aio_pika.Message(body=message.encode()),
             routing_key=routing_key,
+        )
+        print(
+            f"publish 실행 중: PID {os.getpid()}, 스레드 {threading.current_thread().name}"
         )
         print(f"📨 메시지 전송: {message}")
 
