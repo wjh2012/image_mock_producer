@@ -1,8 +1,6 @@
-import os
-import threading
-
 import aioboto3
 from app.config import get_settings
+from app.custom_logger import time_logger
 
 config = get_settings()
 
@@ -25,12 +23,10 @@ class AioBoto:
         self.s3_resource = await self.s3_resource_cm.__aenter__()
         print("✅ Minio 연결 성공")
 
+    @time_logger
     async def uploadFile(self, file, bucket_name: str, key: str):
         bucket = await self.s3_resource.Bucket(bucket_name)
         await bucket.upload_fileobj(file, key)
-        print(
-            f"uploadFile 실행 중: PID {os.getpid()}, 스레드 {threading.current_thread().name}"
-        )
         print(f"✅ MinIO 파일 업로드 성공: {key} (Bucket: {bucket_name})")
 
     async def close(self):

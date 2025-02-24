@@ -54,8 +54,8 @@ async def process_image_upload():
     await rabbit_publisher.send_message("image_validation", json.dumps(message))
 
 
-async def process_compressed_image_upload():
-    compressed_image_bytes = await get_compressed_a4()
+async def process_compressed_image_upload(count=10):
+    compressed_image_bytes = await get_compressed_a4(count)
     compressed_image = io.BytesIO(compressed_image_bytes)
 
     prefix = datetime.now().strftime("%Y%m%d")
@@ -71,8 +71,8 @@ async def process_compressed_image_upload():
     await rabbit_publisher.send_message("image_validation", json.dumps(message))
 
 
-async def process_compressed_image_upload_mp():
-    compressed_image_bytes = await get_compressed_a4_mp()
+async def process_compressed_image_upload_mp(count=10):
+    compressed_image_bytes = await get_compressed_a4_mp(count=count)
     compressed_image = io.BytesIO(compressed_image_bytes)
 
     prefix = datetime.now().strftime("%Y%m%d")
@@ -94,8 +94,10 @@ async def produce_single_image(background_tasks: BackgroundTasks):
 
 
 @app.get("/async-produce-compressed-image_mp", status_code=202)
-async def async_produce_single_image(background_tasks: BackgroundTasks):
-    background_tasks.add_task(process_compressed_image_upload_mp)
+async def async_produce_single_image(
+    background_tasks: BackgroundTasks, count: int = 10
+):
+    background_tasks.add_task(process_compressed_image_upload_mp, count)
     return {"message": "produce compressed image and upload"}
 
 

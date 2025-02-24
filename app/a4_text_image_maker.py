@@ -1,9 +1,6 @@
 import asyncio
 import io
-import os
 import random
-import threading
-import time
 import uuid
 import zipfile
 from concurrent.futures import ProcessPoolExecutor
@@ -72,9 +69,6 @@ def get_single_a4_bytes():
     image = get_single_a4_sync()
     img_byte_arr = io.BytesIO()
     image.save(img_byte_arr, format="JPEG")
-    print(
-        f"get_single_a4_bytes 실행 중: PID {os.getpid()}, 스레드 {threading.current_thread().name}"
-    )
     return img_byte_arr.getvalue()
 
 
@@ -99,8 +93,7 @@ def zip_images_mp(img_bytes_list):
     return zip_buffer.getvalue()
 
 
-async def get_compressed_a4_mp(count=40):
-    start_time = time.perf_counter()
+async def get_compressed_a4_mp(count=10):
     loop = asyncio.get_running_loop()
     with ProcessPoolExecutor(max_workers=4) as executor:
         tasks = [
@@ -108,8 +101,6 @@ async def get_compressed_a4_mp(count=40):
         ]
         images_bytes = await asyncio.gather(*tasks)
         zip_bytes = await loop.run_in_executor(executor, zip_images_mp, images_bytes)
-    end_time = time.perf_counter()
-    print(f"전체 처리 시간: {end_time - start_time:.2f} 초")
     return zip_bytes
 
 
@@ -134,11 +125,8 @@ def zip_images(img_bytes_list):
     return zip_buffer.getvalue()
 
 
-async def get_compressed_a4(count=40):
-    start_time = time.perf_counter()
+async def get_compressed_a4(count=10):
     tasks = [get_single_a4_p() for _ in range(count)]
     images = await asyncio.gather(*tasks)
     zip_buffer = await asyncio.to_thread(zip_images, images)
-    end_time = time.perf_counter()
-    print(f"전체 처리 시간: {end_time - start_time:.2f} 초")
     return zip_buffer
