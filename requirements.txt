@@ -6,9 +6,9 @@ black
 msgspec
 pydantic-settings
 
-aio-pika
 pika
 boto3
+aio-pika
 aioboto3
 
 opencv-python-headless

@@ -49,7 +49,9 @@ async def process_image_upload():
     bucket_name = f"a4-ocr-{config.run_mode}"
     message = {"file_name": gen_name, "bucket": bucket_name, "timestamp": timestamp}
 
-    await minio.uploadFile(file=image_file, bucket_name=bucket_name, key=gen_name)
+    await minio.upload_image_with_resource(
+        file=image_file, bucket_name=bucket_name, key=gen_name
+    )
     await rabbit_publisher.send_message("image_validation", json.dumps(message))
 
 
@@ -65,7 +67,9 @@ async def process_compressed_image_upload(count=10):
     bucket_name = f"a4-ocr-{config.run_mode}"
     message = {"file_name": gen_name, "bucket": bucket_name, "timestamp": timestamp}
 
-    await minio.uploadFile(file=compressed_image, bucket_name=bucket_name, key=gen_name)
+    await minio.upload_image_with_resource(
+        file=compressed_image, bucket_name=bucket_name, key=gen_name
+    )
     await rabbit_publisher.send_message("image_validation", json.dumps(message))
 
 
@@ -81,7 +85,9 @@ async def process_compressed_image_upload_mp(count=10):
     bucket_name = f"a4-ocr-{config.run_mode}"
     message = {"file_name": gen_name, "bucket": bucket_name, "timestamp": timestamp}
 
-    await minio.uploadFile(file=compressed_image, bucket_name=bucket_name, key=gen_name)
+    await minio.upload_image_with_resource(
+        file=compressed_image, bucket_name=bucket_name, key=gen_name
+    )
     await rabbit_publisher.send_message("image_validation", json.dumps(message))
 
 
