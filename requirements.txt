@@ -13,3 +13,5 @@ aioboto3
 
 opencv-python-headless
 pillow
+
+uuid7

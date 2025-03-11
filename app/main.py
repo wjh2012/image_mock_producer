@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 from datetime import datetime
 
 from fastapi import FastAPI, BackgroundTasks
+from uuid_extensions import uuid7str
 
 from app.aio_boto import AioBoto
 from app.aio_publisher import AioPublisher
@@ -44,10 +45,16 @@ async def process_image_upload():
     prefix = datetime.now().strftime("%Y%m%d")
     timestamp = datetime.now().strftime("%y%m%d%H%M%S")
     short_uuid = uuid.uuid4().hex[:8]
+    gid = uuid7str()
     gen_name = f"{prefix}/{timestamp}_{short_uuid}.jpeg"
 
     bucket_name = f"a4-ocr-{config.run_mode}"
-    message = {"file_name": gen_name, "bucket": bucket_name, "timestamp": timestamp}
+    message = {
+        "gid": gid,
+        "file_name": gen_name,
+        "bucket": bucket_name,
+        "timestamp": timestamp,
+    }
 
     await minio.upload_image_with_resource(
         file=image_file, bucket_name=bucket_name, key=gen_name
@@ -62,10 +69,16 @@ async def process_compressed_image_upload(count=10):
     prefix = datetime.now().strftime("%Y%m%d")
     timestamp = datetime.now().strftime("%y%m%d%H%M%S")
     short_uuid = uuid.uuid4().hex[:8]
+    gid = uuid7str()
     gen_name = f"{prefix}/{timestamp}_{short_uuid}.zip"
 
     bucket_name = f"a4-ocr-{config.run_mode}"
-    message = {"file_name": gen_name, "bucket": bucket_name, "timestamp": timestamp}
+    message = {
+        "gid": gid,
+        "file_name": gen_name,
+        "bucket": bucket_name,
+        "timestamp": timestamp,
+    }
 
     await minio.upload_image_with_resource(
         file=compressed_image, bucket_name=bucket_name, key=gen_name
@@ -80,10 +93,16 @@ async def process_compressed_image_upload_mp(count=10):
     prefix = datetime.now().strftime("%Y%m%d")
     timestamp = datetime.now().strftime("%y%m%d%H%M%S")
     short_uuid = uuid.uuid4().hex[:8]
+    gid = uuid7str()
     gen_name = f"{prefix}/{timestamp}_{short_uuid}.zip"
 
     bucket_name = f"a4-ocr-{config.run_mode}"
-    message = {"file_name": gen_name, "bucket": bucket_name, "timestamp": timestamp}
+    message = {
+        "gid": gid,
+        "file_name": gen_name,
+        "bucket": bucket_name,
+        "timestamp": timestamp,
+    }
 
     await minio.upload_image_with_resource(
         file=compressed_image, bucket_name=bucket_name, key=gen_name
