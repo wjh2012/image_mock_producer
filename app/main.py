@@ -23,7 +23,8 @@ config = get_settings()
 async def lifespan(app: FastAPI):
     global rabbit_publisher, minio
     rabbit_publisher = AioPublisher(
-        f"amqp://{config.rabbitmq_username}:{config.rabbitmq_password}@{config.rabbitmq_host}:{config.rabbitmq_port}"
+        amqp_url=f"amqp://{config.rabbitmq_username}:{config.rabbitmq_password}@{config.rabbitmq_host}:{config.rabbitmq_port}",
+        queues=config.rabbitmq_queues,
     )
     minio = AioBoto(f"http://{config.minio_host}:{config.minio_port}")
 
@@ -59,7 +60,7 @@ async def process_image_upload():
     await minio.upload_image_with_resource(
         file=image_file, bucket_name=bucket_name, key=gen_name
     )
-    await rabbit_publisher.send_message("image_validation", json.dumps(message))
+    await rabbit_publisher.send_message(json.dumps(message))
 
 
 async def process_compressed_image_upload(count=10):
@@ -83,7 +84,7 @@ async def process_compressed_image_upload(count=10):
     await minio.upload_image_with_resource(
         file=compressed_image, bucket_name=bucket_name, key=gen_name
     )
-    await rabbit_publisher.send_message("image_validation", json.dumps(message))
+    await rabbit_publisher.send_message(json.dumps(message))
 
 
 async def process_compressed_image_upload_mp(count=10):
@@ -107,7 +108,7 @@ async def process_compressed_image_upload_mp(count=10):
     await minio.upload_image_with_resource(
         file=compressed_image, bucket_name=bucket_name, key=gen_name
     )
-    await rabbit_publisher.send_message("image_validation", json.dumps(message))
+    await rabbit_publisher.send_message(json.dumps(message))
 
 
 @app.get("/async-produce-single-image", status_code=202)

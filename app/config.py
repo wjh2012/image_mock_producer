@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     rabbitmq_port: str
     rabbitmq_username: str
     rabbitmq_password: str
-    rabbitmq_queue: str
+    rabbitmq_queues: list[str]
 
     minio_host: str
     minio_port: str
