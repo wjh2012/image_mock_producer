@@ -10,7 +10,9 @@ class Settings(BaseSettings):
     rabbitmq_port: str
     rabbitmq_username: str
     rabbitmq_password: str
-    rabbitmq_queues: list[str]
+
+    rabbitmq_image_publish_exchange: str
+    rabbitmq_image_publish_routing_keys: list[str]
 
     minio_host: str
     minio_port: str

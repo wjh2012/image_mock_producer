@@ -22,11 +22,8 @@ config = get_settings()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global rabbit_publisher, minio
-    rabbit_publisher = AioPublisher(
-        amqp_url=f"amqp://{config.rabbitmq_username}:{config.rabbitmq_password}@{config.rabbitmq_host}:{config.rabbitmq_port}",
-        queues=config.rabbitmq_queues,
-    )
-    minio = AioBoto(f"http://{config.minio_host}:{config.minio_port}")
+    rabbit_publisher = AioPublisher()
+    minio = AioBoto()
 
     await rabbit_publisher.connect()
     await minio.connect()

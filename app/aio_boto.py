@@ -6,8 +6,8 @@ config = get_settings()
 
 
 class AioBoto:
-    def __init__(self, minio_url: str):
-        self.minio_url = minio_url
+    def __init__(self):
+        self.minio_url = f"http://{config.minio_host}:{config.minio_port}"
         self._session = None
         self.s3_resource_cm = None
         self.s3_resource = None
@@ -37,6 +37,16 @@ class AioBoto:
     @time_logger
     async def upload_image_with_resource(self, file, bucket_name: str, key: str):
         bucket = await self.s3_resource.Bucket(bucket_name)
+
+        from botocore.exceptions import ClientError
+
+        try:
+            await self.s3_client.head_bucket(Bucket=bucket_name)
+        except ClientError as e:
+            if e.response["Error"]["Code"] == "404":
+                print(f"⚠️ 버킷이 존재하지 않아 생성 시도: {bucket_name}")
+                await self.s3_client.create_bucket(Bucket=bucket_name)
+
         await bucket.upload_fileobj(file, key)
         print(f"✅ MinIO resource 파일 업로드 성공: {key} (Bucket: {bucket_name})")
 
