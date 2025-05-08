@@ -9,7 +9,7 @@ pydantic-settings
 pika
 boto3
 aio-pika
-aioboto3
+aioboto3~=14.3.0
 
 opencv-python-headless
 pillow
