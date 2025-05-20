@@ -18,6 +18,9 @@ class Settings(BaseSettings):
     minio_port: str
     minio_username: str
     minio_password: str
+    minio_bucket: str
+
+    original_image_object_key_prefix: str
 
     model_config = SettingsConfigDict(env_file="app/.env")
 

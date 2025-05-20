@@ -39,17 +39,24 @@ app = FastAPI(lifespan=lifespan)
 async def process_image_upload():
     image_bytes = await get_single_a4_p()
     image_file = io.BytesIO(image_bytes)
+    image_file.seek(0)
 
-    prefix = datetime.now().strftime("%Y%m%d")
-    timestamp = datetime.now().strftime("%y%m%d%H%M%S")
-    short_uuid = uuid.uuid4().hex[:8]
+    prefix = config.original_image_object_key_prefix
     gid = uuid7str()
-    gen_name = f"{prefix}/{timestamp}_{short_uuid}.jpeg"
+    short_uuid = gid[-8:]
 
-    bucket_name = f"a4-ocr-{config.run_mode}"
+    now = datetime.now()
+    date_path = now.strftime("%Y/%m/%d")
+    time_part = now.strftime("%H%M%S")
+    timestamp = now.strftime("%y%m%d%H%M%S")
+
+    gen_name = f"{prefix}/{date_path}/{time_part}_{short_uuid}.jpeg"
+
+    bucket_name = f"{config.minio_bucket}-{config.run_mode}"
+
     message = {
         "gid": gid,
-        "file_name": gen_name,
+        "original_object_key": gen_name,
         "bucket": bucket_name,
         "timestamp": timestamp,
     }
