@@ -1,6 +1,4 @@
 import io
-import json
-import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime
 
@@ -15,6 +13,7 @@ from app.a4_text_image_maker import (
     get_compressed_a4_mp,
     get_compressed_a4,
 )
+from app.publish_message import MessagePayload
 
 config = get_settings()
 
@@ -48,71 +47,71 @@ async def process_image_upload():
     now = datetime.now()
     date_path = now.strftime("%Y/%m/%d")
     time_part = now.strftime("%H%M%S")
-    timestamp = now.strftime("%y%m%d%H%M%S")
 
-    gen_name = f"{prefix}/{date_path}/{time_part}_{short_uuid}.jpeg"
+    gen_name = f"{date_path}/{prefix}/{time_part}_{short_uuid}.jpeg"
 
     bucket_name = f"{config.minio_bucket}-{config.run_mode}"
-
-    message = {
-        "gid": gid,
-        "original_object_key": gen_name,
-        "bucket": bucket_name,
-        "timestamp": timestamp,
-    }
 
     await minio.upload_image_with_resource(
         file=image_file, bucket_name=bucket_name, key=gen_name
     )
-    await rabbit_publisher.send_message(json.dumps(message))
+
+    trace_id = uuid7str()
+    body = MessagePayload(gid, bucket_name, gen_name)
+
+    await rabbit_publisher.send_message(trace_id=trace_id, body=body)
 
 
 async def process_compressed_image_upload(count=10):
     compressed_image_bytes = await get_compressed_a4(count)
     compressed_image = io.BytesIO(compressed_image_bytes)
 
-    prefix = datetime.now().strftime("%Y%m%d")
-    timestamp = datetime.now().strftime("%y%m%d%H%M%S")
-    short_uuid = uuid.uuid4().hex[:8]
+    prefix = config.original_image_object_key_prefix
     gid = uuid7str()
-    gen_name = f"{prefix}/{timestamp}_{short_uuid}.zip"
+    short_uuid = gid[-8:]
+
+    now = datetime.now()
+    date_path = now.strftime("%Y/%m/%d")
+    time_part = now.strftime("%H%M%S")
+
+    gen_name = f"{date_path}/{prefix}/{time_part}_{short_uuid}.zip"
 
     bucket_name = f"a4-ocr-{config.run_mode}"
-    message = {
-        "gid": gid,
-        "file_name": gen_name,
-        "bucket": bucket_name,
-        "timestamp": timestamp,
-    }
 
     await minio.upload_image_with_resource(
         file=compressed_image, bucket_name=bucket_name, key=gen_name
     )
-    await rabbit_publisher.send_message(json.dumps(message))
+
+    trace_id = uuid7str()
+    body = MessagePayload(gid, bucket_name, gen_name)
+
+    await rabbit_publisher.send_message(trace_id=trace_id, body=body)
 
 
 async def process_compressed_image_upload_mp(count=10):
     compressed_image_bytes = await get_compressed_a4_mp(count=count)
     compressed_image = io.BytesIO(compressed_image_bytes)
 
-    prefix = datetime.now().strftime("%Y%m%d")
-    timestamp = datetime.now().strftime("%y%m%d%H%M%S")
-    short_uuid = uuid.uuid4().hex[:8]
+    prefix = config.original_image_object_key_prefix
     gid = uuid7str()
-    gen_name = f"{prefix}/{timestamp}_{short_uuid}.zip"
+    short_uuid = gid[-8:]
+
+    now = datetime.now()
+    date_path = now.strftime("%Y/%m/%d")
+    time_part = now.strftime("%H%M%S")
+
+    gen_name = f"{date_path}/{prefix}/{time_part}_{short_uuid}.zip"
 
     bucket_name = f"a4-ocr-{config.run_mode}"
-    message = {
-        "gid": gid,
-        "file_name": gen_name,
-        "bucket": bucket_name,
-        "timestamp": timestamp,
-    }
 
     await minio.upload_image_with_resource(
         file=compressed_image, bucket_name=bucket_name, key=gen_name
     )
-    await rabbit_publisher.send_message(json.dumps(message))
+
+    trace_id = uuid7str()
+    body = MessagePayload(gid, bucket_name, gen_name)
+
+    await rabbit_publisher.send_message(trace_id=trace_id, body=body)
 
 
 @app.get("/async-produce-single-image", status_code=202)
